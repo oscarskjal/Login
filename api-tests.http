@@ -1,0 +1,72 @@
+### Test basic server connection
+GET http://localhost:3000
+
+###
+
+### Test database connection
+GET http://localhost:3000/test-db
+
+###
+
+### Get all users
+GET http://localhost:3000/api/users
+
+###
+
+### Get specific user by ID
+GET http://localhost:3000/api/users/1
+
+###
+
+### Create a new user
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "name": "Erik Johansson",
+  "email": "erik@example.com"
+}
+
+###
+
+### Create another user
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "name": "Maria Nilsson",
+  "email": "maria@example.com"
+}
+
+###
+
+### Create user with Swedish characters
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "name": "Åsa Öberg",
+  "email": "asa@example.com"
+}
+
+###
+
+### Test error handling - missing name
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "email": "incomplete@example.com"
+}
+
+###
+
+### Test error handling - missing email
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "name": "Incomplete User"
+}
+
+###

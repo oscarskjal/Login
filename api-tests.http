@@ -13,12 +13,12 @@ GET http://localhost:3000/api/users
 
 ###
 
-### Get specific user by ID
+
 GET http://localhost:3000/api/users/1
 
 ###
 
-### Create a new user with username and password
+
 POST http://localhost:3000/api/users
 Content-Type: application/json
 
@@ -29,7 +29,7 @@ Content-Type: application/json
 
 ###
 
-### Create another user
+
 POST http://localhost:3000/api/users
 Content-Type: application/json
 
@@ -40,7 +40,7 @@ Content-Type: application/json
 
 ###
 
-### Create user with Swedish characters
+
 POST http://localhost:3000/api/users
 Content-Type: application/json
 
@@ -51,7 +51,7 @@ Content-Type: application/json
 
 ###
 
-### Test error handling - missing username
+
 POST http://localhost:3000/api/users
 Content-Type: application/json
 
@@ -61,7 +61,7 @@ Content-Type: application/json
 
 ###
 
-### Test error handling - weak password
+
 POST http://localhost:3000/api/users
 Content-Type: application/json
 
@@ -72,7 +72,7 @@ Content-Type: application/json
 
 ###
 
-### Test error handling - duplicate username
+
 POST http://localhost:3000/api/users
 Content-Type: application/json
 
@@ -83,11 +83,7 @@ Content-Type: application/json
 
 ###
 
-### ======================
-### AUTHENTICATION TESTS
-### ======================
 
-### Login with valid credentials (alice_andersson from seed data)
 POST http://localhost:3000/api/auth/login
 Content-Type: application/json
 
@@ -98,7 +94,7 @@ Content-Type: application/json
 
 ###
 
-### Login with valid credentials (bob_bengtsson from seed data)
+
 POST http://localhost:3000/api/auth/login
 Content-Type: application/json
 
@@ -109,7 +105,7 @@ Content-Type: application/json
 
 ###
 
-### Login with invalid username
+
 POST http://localhost:3000/api/auth/login
 Content-Type: application/json
 
@@ -120,7 +116,7 @@ Content-Type: application/json
 
 ###
 
-### Login with invalid password
+
 POST http://localhost:3000/api/auth/login
 Content-Type: application/json
 
@@ -131,7 +127,7 @@ Content-Type: application/json
 
 ###
 
-### Login missing username
+
 POST http://localhost:3000/api/auth/login
 Content-Type: application/json
 
@@ -141,7 +137,7 @@ Content-Type: application/json
 
 ###
 
-### Login missing password
+
 POST http://localhost:3000/api/auth/login
 Content-Type: application/json
 

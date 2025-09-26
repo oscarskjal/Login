@@ -1,5 +1,6 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
+const bcrypt = require("bcrypt");
 require("dotenv").config();
 
 const app = express();
@@ -46,6 +47,13 @@ app.get("/test-db", async (req, res) => {
 app.get("/api/users", async (req, res) => {
   try {
     const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        username: true,
+        createdAt: true,
+        updatedAt: true,
+        // Exclude password from response
+      },
       orderBy: {
         createdAt: "desc",
       },
@@ -68,24 +76,58 @@ app.get("/api/users", async (req, res) => {
 // Create a new user
 app.post("/api/users", async (req, res) => {
   try {
-    const { name, email } = req.body;
+    const { username, password } = req.body;
 
-    if (!name || !email) {
+    // Validate required fields
+    if (!username || !password) {
       return res.status(400).json({
         success: false,
-        message: "Name and email are required",
+        message: "Username and password are required",
       });
     }
 
+    // Validate password strength (minimum 6 characters)
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters long",
+      });
+    }
+
+    // Check if username already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { username: username },
+    });
+
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: "Username already exists",
+      });
+    }
+
+    // Hash the password with salt
+    const saltRounds = 12; // Higher is more secure but slower
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Create user with hashed password
     const user = await prisma.user.create({
       data: {
-        name,
-        email,
+        username,
+        password: hashedPassword,
+      },
+      select: {
+        id: true,
+        username: true,
+        createdAt: true,
+        updatedAt: true,
+        // Exclude password from response
       },
     });
 
     res.status(201).json({
       success: true,
+      message: "User created successfully",
       user,
     });
   } catch (err) {
@@ -104,6 +146,13 @@ app.get("/api/users/:id", async (req, res) => {
     const { id } = req.params;
     const user = await prisma.user.findUnique({
       where: { id: parseInt(id) },
+      select: {
+        id: true,
+        username: true,
+        createdAt: true,
+        updatedAt: true,
+        // Exclude password from response
+      },
     });
 
     if (!user) {
@@ -122,6 +171,62 @@ app.get("/api/users/:id", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error fetching user",
+      error: err.message,
+    });
+  }
+});
+
+// Authentication endpoint - Login
+app.post("/api/auth/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    // Validate required fields
+    if (!username || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Username and password are required",
+      });
+    }
+
+    // Find user by username
+    const user = await prisma.user.findUnique({
+      where: { username: username },
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid username or password",
+      });
+    }
+
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid username or password",
+      });
+    }
+
+    // Login successful - return user data without password
+    res.json({
+      success: true,
+      message: "Login successful",
+      user: {
+        id: user.id,
+        username: user.username,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      },
+    });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error during login",
       error: err.message,
     });
   }

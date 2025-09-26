@@ -18,13 +18,13 @@ GET http://localhost:3000/api/users/1
 
 ###
 
-### Create a new user
+### Create a new user with username and password
 POST http://localhost:3000/api/users
 Content-Type: application/json
 
 {
-  "name": "Erik Johansson",
-  "email": "erik@example.com"
+  "username": "erik_johansson",
+  "password": "secretpassword123"
 }
 
 ###
@@ -34,8 +34,8 @@ POST http://localhost:3000/api/users
 Content-Type: application/json
 
 {
-  "name": "Maria Nilsson",
-  "email": "maria@example.com"
+  "username": "maria_nilsson",
+  "password": "mypassword456"
 }
 
 ###
@@ -45,28 +45,108 @@ POST http://localhost:3000/api/users
 Content-Type: application/json
 
 {
-  "name": "Åsa Öberg",
-  "email": "asa@example.com"
+  "username": "asa_oberg",
+  "password": "svensklösenord789"
 }
 
 ###
 
-### Test error handling - missing name
+### Test error handling - missing username
 POST http://localhost:3000/api/users
 Content-Type: application/json
 
 {
-  "email": "incomplete@example.com"
+  "password": "password123"
 }
 
 ###
 
-### Test error handling - missing email
+### Test error handling - weak password
 POST http://localhost:3000/api/users
 Content-Type: application/json
 
 {
-  "name": "Incomplete User"
+  "username": "weakuser",
+  "password": "123"
+}
+
+###
+
+### Test error handling - duplicate username
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "username": "erik_johansson",
+  "password": "differentpassword"
+}
+
+###
+
+### ======================
+### AUTHENTICATION TESTS
+### ======================
+
+### Login with valid credentials (alice_andersson from seed data)
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "alice_andersson",
+  "password": "password123"
+}
+
+###
+
+### Login with valid credentials (bob_bengtsson from seed data)
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "bob_bengtsson",
+  "password": "password456"
+}
+
+###
+
+### Login with invalid username
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "nonexistent_user",
+  "password": "anypassword"
+}
+
+###
+
+### Login with invalid password
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "alice_andersson",
+  "password": "wrongpassword"
+}
+
+###
+
+### Login missing username
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "password": "password123"
+}
+
+###
+
+### Login missing password
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "alice_andersson"
 }
 
 ###

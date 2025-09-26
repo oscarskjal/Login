@@ -5,8 +5,8 @@ async function testCreateUser() {
     console.log("Testing create user endpoint...");
 
     const response = await axios.post("http://localhost:3000/api/users", {
-      username: "testuser123",
-      password: "testpassword456",
+      username: "oscar_test",
+      password: "testpassword123",
     });
 
     console.log("✅ User creation successful!");

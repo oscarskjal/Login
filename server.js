@@ -1,6 +1,7 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 const app = express();
@@ -12,6 +13,30 @@ const prisma = new PrismaClient();
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// JWT Middleware för protected routes
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
+
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      message: "Access denied. No token provided.",
+    });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(403).json({
+      success: false,
+      message: "Invalid or expired token.",
+    });
+  }
+};
 
 // Basic route
 app.get("/", (req, res) => {
@@ -43,8 +68,8 @@ app.get("/test-db", async (req, res) => {
   }
 });
 
-// Get all users
-app.get("/api/users", async (req, res) => {
+// Get all users (protected route)
+app.get("/api/users", authenticateToken, async (req, res) => {
   try {
     const users = await prisma.user.findMany({
       select: {
@@ -73,12 +98,10 @@ app.get("/api/users", async (req, res) => {
   }
 });
 
-// Create a new user
 app.post("/api/users", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // Validate required fields
     if (!username || !password) {
       return res.status(400).json({
         success: false,
@@ -86,7 +109,6 @@ app.post("/api/users", async (req, res) => {
       });
     }
 
-    // Validate password strength (minimum 6 characters)
     if (password.length < 6) {
       return res.status(400).json({
         success: false,
@@ -94,7 +116,6 @@ app.post("/api/users", async (req, res) => {
       });
     }
 
-    // Check if username already exists
     const existingUser = await prisma.user.findUnique({
       where: { username: username },
     });
@@ -106,11 +127,9 @@ app.post("/api/users", async (req, res) => {
       });
     }
 
-    // Hash the password with salt
-    const saltRounds = 12; // Higher is more secure but slower
+    const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create user with hashed password
     const user = await prisma.user.create({
       data: {
         username,
@@ -121,7 +140,6 @@ app.post("/api/users", async (req, res) => {
         username: true,
         createdAt: true,
         updatedAt: true,
-        // Exclude password from response
       },
     });
 
@@ -140,7 +158,6 @@ app.post("/api/users", async (req, res) => {
   }
 });
 
-// Get a specific user
 app.get("/api/users/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -151,7 +168,6 @@ app.get("/api/users/:id", async (req, res) => {
         username: true,
         createdAt: true,
         updatedAt: true,
-        // Exclude password from response
       },
     });
 
@@ -176,12 +192,10 @@ app.get("/api/users/:id", async (req, res) => {
   }
 });
 
-// Authentication endpoint - Login
 app.post("/api/auth/login", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // Validate required fields
     if (!username || !password) {
       return res.status(400).json({
         success: false,
@@ -189,7 +203,6 @@ app.post("/api/auth/login", async (req, res) => {
       });
     }
 
-    // Find user by username
     const user = await prisma.user.findUnique({
       where: { username: username },
     });
@@ -201,7 +214,6 @@ app.post("/api/auth/login", async (req, res) => {
       });
     }
 
-    // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
@@ -211,10 +223,19 @@ app.post("/api/auth/login", async (req, res) => {
       });
     }
 
-    // Login successful - return user data without password
+    const token = jwt.sign(
+      {
+        userId: user.id,
+        username: user.username,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "24h" }
+    );
+
     res.json({
       success: true,
       message: "Login successful",
+      token: token,
       user: {
         id: user.id,
         username: user.username,
@@ -232,7 +253,39 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
-// Start server
+app.get("/api/profile", authenticateToken, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.userId },
+      select: {
+        id: true,
+        username: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      user: user,
+    });
+  } catch (err) {
+    console.error("Profile error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: err.message,
+    });
+  }
+});
+
 app.listen(port, () => {
   console.log(`🚀 Server running on http://localhost:${port}`);
   console.log(
@@ -240,7 +293,6 @@ app.listen(port, () => {
   );
 });
 
-// Graceful shutdown
 process.on("SIGINT", async () => {
   console.log("\n🛑 Shutting down server...");
   await prisma.$disconnect();

@@ -8,13 +8,26 @@ GET http://localhost:3000/test-db
 
 ###
 
-### Get all users
+### Get all users (PROTECTED - requires JWT token)
+### First login and copy the token, then add it to Authorization header
 GET http://localhost:3000/api/users
 
 ###
 
+### Test protected profile endpoint (requires JWT token)
+### First login and copy token, then add: Authorization: Bearer YOUR_TOKEN_HERE
+GET http://localhost:3000/api/profile
 
-GET http://localhost:3000/api/users/1
+###
+
+### Login to get JWT token (copy token from response for protected routes)
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "alice_andersson",
+  "password": "password123"
+}
 
 ###
 
@@ -167,3 +180,57 @@ Content-Type: application/json
 
 ### Get all users
 GET http://localhost:3000/api/users
+
+###
+
+# ==============================================
+# 🔐 JWT AUTHENTICATION TESTS
+# ==============================================
+
+
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "username": "jwt_testuser",
+  "password": "testpassword123"
+}
+
+###
+
+
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "jwt_testuser",
+  "password": "testpassword123"
+}
+
+###
+
+e
+GET http://localhost:3000/api/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsInVzZXJuYW1lIjoiand0X3Rlc3R1c2VyIiwiaWF0IjoxNzU4ODY5MDY5LCJleHAiOjE3NTg5NTU0Njl9.Mb_StrzMjMdmxCNSwu9XXOB3NleDkThzvzb04YntR3E
+
+###
+
+GET http://localhost:3000/api/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsInVzZXJuYW1lIjoiand0X3Rlc3R1c2VyIiwiaWF0IjoxNzU4ODY5MDY5LCJleHAiOjE3NTg5NTU0Njl9.Mb_StrzMjMdmxCNSwu9XXOB3NleDkThzvzb04YntR3E
+
+###
+
+
+GET http://localhost:3000/api/profile
+
+###
+
+
+GET http://localhost:3000/api/profile
+Authorization: Bearer invalid_token_123
+
+###
+
+
+GET http://localhost:3000/api/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWxpY2VfYW5kZXJzc29uIiwiaWF0IjoxNzI3MzMzMjAwLCJleHAiOjE3Mjc0MTk2MDB9.example_signature_here

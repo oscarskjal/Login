@@ -3,50 +3,26 @@ const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
+const authenticateToken = require("./token");
 require("dotenv").config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Initialize Prisma Client
 const prisma = new PrismaClient();
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Enable CORS for all routes
+// Enable CORS s
 app.use(
   cors({
-    origin: "*", // Allow all origins
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
-// JWT Middleware för protected routes
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
-
-  if (!token) {
-    return res.status(401).json({
-      success: false,
-      message: "Access denied. No token provided.",
-    });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    return res.status(403).json({
-      success: false,
-      message: "Invalid or expired token.",
-    });
-  }
-};
 
 // Basic route
 app.get("/", (req, res) => {
@@ -87,7 +63,6 @@ app.get("/api/users", authenticateToken, async (req, res) => {
         username: true,
         createdAt: true,
         updatedAt: true,
-        // Exclude password from response
       },
       orderBy: {
         createdAt: "desc",

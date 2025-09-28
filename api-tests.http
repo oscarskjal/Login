@@ -8,19 +8,17 @@ GET http://localhost:3000/test-db
 
 ###
 
-### Get all users (PROTECTED - requires JWT token)
-### First login and copy the token, then add it to Authorization header
+### Get users (kräver JWT token)
 GET http://localhost:3000/api/users
 
 ###
 
-### Test protected profile endpoint (requires JWT token)
-### First login and copy token, then add: Authorization: Bearer YOUR_TOKEN_HERE
+### Test protected profile endpoint (kräver JWT token)
 GET http://localhost:3000/api/profile
 
 ###
 
-### Login to get JWT token (copy token from response for protected routes)
+### Login för att få JWT token 
 POST http://localhost:3000/api/auth/login
 Content-Type: application/json
 
@@ -29,7 +27,7 @@ Content-Type: application/json
   "password": "password123"
 }
 
-###
+### Test - Create new user
 
 
 POST http://localhost:3000/api/users
@@ -40,7 +38,7 @@ Content-Type: application/json
   "password": "secretpassword123"
 }
 
-###
+### Mera test
 
 
 POST http://localhost:3000/api/users
@@ -51,7 +49,7 @@ Content-Type: application/json
   "password": "mypassword456"
 }
 
-###
+### 
 
 
 POST http://localhost:3000/api/users
@@ -62,7 +60,7 @@ Content-Type: application/json
   "password": "svensklösenord789"
 }
 
-###
+### 
 
 
 POST http://localhost:3000/api/users
@@ -72,7 +70,7 @@ Content-Type: application/json
   "password": "password123"
 }
 
-###
+### 
 
 
 POST http://localhost:3000/api/users
@@ -83,7 +81,7 @@ Content-Type: application/json
   "password": "123"
 }
 
-###
+### 
 
 
 POST http://localhost:3000/api/users
@@ -94,7 +92,7 @@ Content-Type: application/json
   "password": "differentpassword"
 }
 
-###
+### 
 
 
 POST http://localhost:3000/api/auth/login
@@ -105,7 +103,7 @@ Content-Type: application/json
   "password": "password123"
 }
 
-###
+### 
 
 
 POST http://localhost:3000/api/auth/login
@@ -116,7 +114,7 @@ Content-Type: application/json
   "password": "password456"
 }
 
-###
+### 
 
 
 POST http://localhost:3000/api/auth/login
@@ -127,7 +125,7 @@ Content-Type: application/json
   "password": "anypassword"
 }
 
-###
+### 
 
 
 POST http://localhost:3000/api/auth/login
@@ -160,7 +158,7 @@ Content-Type: application/json
 
 
 
-### Test - Create new user
+### Flera test
 POST http://localhost:3000/api/users
 Content-Type: application/json
 
@@ -181,11 +179,11 @@ Content-Type: application/json
 ### Get all users
 GET http://localhost:3000/api/users
 
-###
+### 
 
-# ==============================================
-# 🔐 JWT AUTHENTICATION TESTS
-# ==============================================
+
+# JWT AUTHENTICATION TEST
+
 
 
 POST http://localhost:3000/api/users
@@ -196,7 +194,7 @@ Content-Type: application/json
   "password": "testpassword123"
 }
 
-###
+### 
 
 
 POST http://localhost:3000/api/auth/login
@@ -207,13 +205,14 @@ Content-Type: application/json
   "password": "testpassword123"
 }
 
-###
+### Bearer test
 
-e
+
 GET http://localhost:3000/api/profile
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsInVzZXJuYW1lIjoiand0X3Rlc3R1c2VyIiwiaWF0IjoxNzU4ODY5MDY5LCJleHAiOjE3NTg5NTU0Njl9.Mb_StrzMjMdmxCNSwu9XXOB3NleDkThzvzb04YntR3E
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsInVzZXJuYW1lIjoiand0X3Rlc3R1c2VyIiwiaWF0IjoxNzU5MDQzMjQ0LCJleHAiOjE3NTkxMjk2NDR9.a7z4ALGjKIpXYSALcTU5HQCDve_hfIGOqYVVQ3pCS4k
 
-###
+
+### 
 
 GET http://localhost:3000/api/users
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsInVzZXJuYW1lIjoiand0X3Rlc3R1c2VyIiwiaWF0IjoxNzU4ODY5MDY5LCJleHAiOjE3NTg5NTU0Njl9.Mb_StrzMjMdmxCNSwu9XXOB3NleDkThzvzb04YntR3E
@@ -223,7 +222,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsInVzZ
 
 GET http://localhost:3000/api/profile
 
-###
+
+### Invalid test token
 
 
 GET http://localhost:3000/api/profile

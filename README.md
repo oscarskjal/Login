@@ -15,20 +15,6 @@ This will:
 - Map port 3000 to your host machine
 - Load environment variables from .env file
 
-## Manual Docker Instructions
-
-### Build the image:
-
-```bash
-docker build -t login-api .
-```
-
-### Run container:
-
-```bash
-docker run -p 3000:3000 --env-file .env login-api
-```
-
 ## Stop the application
 
 ```bash

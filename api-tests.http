@@ -234,3 +234,13 @@ Authorization: Bearer invalid_token_123
 
 GET http://localhost:3000/api/profile
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWxpY2VfYW5kZXJzc29uIiwiaWF0IjoxNzI3MzMzMjAwLCJleHAiOjE3Mjc0MTk2MDB9.example_signature_here
+
+### login test
+
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "alice_andersson",
+  "password": "password123"
+}

@@ -6,6 +6,14 @@ const cors = require("cors");
 const authenticateToken = require("./token");
 require("dotenv").config();
 
+const {
+  generateRefreshToken,
+  generateAccessToken,
+  saveRefreshToken,
+  validateRefreshToken,
+  revokeRefreshToken,
+} = require("./refreshTokenUtils");
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -208,25 +216,25 @@ app.post("/api/auth/login", async (req, res) => {
       });
     }
 
-    const token = jwt.sign(
-      {
-        userId: user.id,
-        username: user.username,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "24h" }
-    );
+    // Generera tokens
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken();
+
+    // Spara refresh token i databas
+    await saveRefreshToken(user.id, refreshToken);
 
     res.json({
       success: true,
       message: "Login successful",
-      token: token,
+      accessToken,
+      refreshToken,
       user: {
         id: user.id,
         username: user.username,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       },
+      expiresIn: "15m", // Access token giltighetstid
     });
   } catch (err) {
     console.error("Login error:", err);
@@ -267,6 +275,67 @@ app.get("/api/profile", authenticateToken, async (req, res) => {
       success: false,
       message: "Internal server error",
       error: err.message,
+    });
+  }
+});
+
+// Refresh token endpoint
+app.post("/api/auth/refresh", async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: "Refresh token required",
+      });
+    }
+
+    // Validera refresh token
+    const tokenData = await validateRefreshToken(refreshToken);
+
+    if (!tokenData) {
+      return res.status(403).json({
+        success: false,
+        message: "Invalid or expired refresh token",
+      });
+    }
+
+    // Generera ny access token
+    const newAccessToken = generateAccessToken(tokenData.user);
+
+    res.json({
+      success: true,
+      accessToken: newAccessToken,
+      expiresIn: "15m",
+    });
+  } catch (error) {
+    console.error("Refresh error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+});
+
+// Logout endpoint
+app.post("/api/auth/logout", async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (refreshToken) {
+      await revokeRefreshToken(refreshToken);
+    }
+
+    res.json({
+      success: true,
+      message: "Logged out successfully",
+    });
+  } catch (error) {
+    console.error("Logout error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
     });
   }
 });
